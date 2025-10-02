@@ -12,7 +12,7 @@ load_dotenv()
 
 BASE_URL = "https://api.github.com/graphql"
 ACCESS_TOKEN = os.getenv("TOKEN")
-OUTPUT_FILENAME = "../results/pull_requests_dataset_final.csv"
+OUTPUT_FILENAME = "results/pull_requests_dataset_final.csv"
 
 if not ACCESS_TOKEN:
   print("ERRO: Token não encontrado. Verifique seu arquivo .env.")
@@ -23,21 +23,34 @@ REQUEST_HEADERS = {"Authorization": f"token {ACCESS_TOKEN}"}
 QUERY_PRS = """
 query($owner: String!, $name: String!, $cursor: String) {
 repository(owner: $owner, name: $name) {
-  pullRequests(states: [MERGED, CLOSED], first: 100, after: $cursor) { # Otimização #1
+  pullRequests(states: [MERGED, CLOSED], first: 20, after: $cursor) {
     pageInfo {
       endCursor
       hasNextPage
     }
     nodes {
-      number; changedFiles; additions; deletions; createdAt; closedAt;
-      mergedAt; body;
-      participants(first: 1) { totalCount }
+      number
+      changedFiles
+      additions
+      deletions
+      createdAt
+      closedAt
+      mergedAt
+      body
+      participants(first: 1) {
+        totalCount
+      }
       totalCommentsCount
-      reviews(first: 1) { totalCount }
+      reviews(first: 1) {
+        totalCount
+      }
     }
   }
 }
-rateLimit { remaining; resetAt }
+rateLimit {
+  remaining
+  resetAt
+}
 }
 """
 
@@ -144,7 +157,7 @@ def processRepo(owner, name):
 
 
 def main():
-  repos_df = pd.read_csv("../results/repos.csv")
+  repos_df = pd.read_csv("results/repos.csv")
   processed_repos = getValidRepos(OUTPUT_FILENAME) # Otimização #3
 
   for index, repo in repos_df.iterrows():
